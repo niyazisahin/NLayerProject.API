@@ -11,30 +11,32 @@ namespace NLayerProject.Data.Repository
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        public readonly DbContext _context;
-        public readonly DbSet<TEntity> _dbSet;
+        protected readonly DbContext _context;
+        private readonly DbSet<TEntity> _dbSet;
 
-        public Repository(DbContext context)
+        public Repository(AppDbContext context)
         {   _context = context;
             _dbSet = context.Set<TEntity>();
          
         }
 
 
-        public async Task AddAsync(TEntity entity)
+        public async Task  AddAsync(TEntity entity)
         {
             //await = bundan sonra yazacağım satır bitene kadar bu satırda bekle.
             await _dbSet.AddAsync(entity);
+            
         }
 
         public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await _dbSet.AddRangeAsync(entities);
+            
         }
 
-        public IEnumerable<TEntity> Where(Expression<Func<TEntity, bool>> predicate)
+        public async Task<IEnumerable<TEntity>> Where(Expression<Func<TEntity, bool>> predicate)
         {
-            return _dbSet.Where(predicate);
+            return await _dbSet.Where(predicate).ToListAsync();
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
@@ -57,7 +59,7 @@ namespace NLayerProject.Data.Repository
             _dbSet.RemoveRange(entities);
         }
 
-        public async Task<TEntity> SingeOrDefault(Expression<Func<TEntity, bool>> predicate)
+        public async Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbSet.SingleOrDefaultAsync(predicate);
         }
@@ -67,5 +69,6 @@ namespace NLayerProject.Data.Repository
             _context.Entry(entity).State = EntityState.Modified;
             return entity;
         }
+
     }
 }

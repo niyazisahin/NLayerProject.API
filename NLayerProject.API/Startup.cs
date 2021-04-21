@@ -2,10 +2,18 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLayerProject.Core.Repositories;
+using NLayerProject.Core.Services;
+using NLayerProject.Core.UnitOfWorks;
+using NLayerProject.Data;
+using NLayerProject.Data.Repository;
+using NLayerProject.Data.UnitOfWork;
+using NLayerProject.Service.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +33,28 @@ namespace NLayerProject.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Bu interface ile kaþýlaþtýðýnda þu sýnýftan nesne türet.
+            //Dependency Injection.
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped(typeof(IService<>), typeof(Service<>));
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductService, ProductService>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+
+
+
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), o=> {
+                    o.MigrationsAssembly("NLayerProject.Data");                
+                });
+            });
+            
             services.AddControllers();
         }
 

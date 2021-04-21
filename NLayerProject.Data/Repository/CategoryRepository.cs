@@ -20,5 +20,7 @@ namespace NLayerProject.Data.Repository
             return await appDbContext.Categories.Include(x => x.Product).
                 SingleOrDefaultAsync(x=>x.Id == categoryId);
         }
+
+
     }
 }
