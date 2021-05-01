@@ -1,0 +1,26 @@
+﻿
+@model IEnumerable<UdemyNLayerProject.Web.DTOs.CategoryDto>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Kategoriler</h1>
+
+<table>
+    <tr>
+        <td>ID</td>
+        <td>Name</td>
+
+    </tr>
+    @foreach (var category in Model)
+    {
+        <tr>
+            <td>@category.Id</td>
+            <td>@category.Name</td>
+
+        </tr>
+    }
+
+</table>
+

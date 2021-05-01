@@ -1,18 +1,10 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using NLayerProject.API.DTOs;
-using NLayerProject.API.Extensions;
-using NLayerProject.API.Filters;
 using NLayerProject.Core.Repositories;
 using NLayerProject.Core.Services;
 using NLayerProject.Core.UnitOfWorks;
@@ -25,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NLayerProject.API
+namespace UdemyNLayerProject.Web
 {
     public class Startup
     {
@@ -39,10 +31,7 @@ namespace NLayerProject.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Bu interface ile kaþýlaþtýðýnda þu sýnýftan nesne türet.
-            //Dependency Injection.
-            services.AddAutoMapper(typeof(Startup));
-            services.AddScoped<NotFoundFilter>();
+            services.AddControllersWithViews();
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IService<>), typeof(Service<>));
@@ -54,18 +43,9 @@ namespace NLayerProject.API
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), o=> {
-                    o.MigrationsAssembly("NLayerProject.Data");                
+                options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), o => {
+                    o.MigrationsAssembly("NLayerProject.Data");
                 });
-            });
-
-            services.AddControllers(o =>
-            {
-                o.Filters.Add(new ValidationFilter());
-            });
-            services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
             });
         }
 
@@ -76,9 +56,14 @@ namespace NLayerProject.API
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCustomException();
-
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
@@ -86,7 +71,9 @@ namespace NLayerProject.API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
